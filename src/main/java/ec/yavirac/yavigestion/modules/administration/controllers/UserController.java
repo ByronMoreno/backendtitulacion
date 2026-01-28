@@ -7,24 +7,31 @@ import ec.yavirac.yavigestion.modules.administration.services.facades.user.UserF
 import ec.yavirac.yavigestion.modules.core.dtos.response.GenericOnlyTextResponse;
 import ec.yavirac.yavigestion.modules.core.dtos.response.GenericPaginationResponse;
 import ec.yavirac.yavigestion.modules.core.dtos.response.GenericResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
+// ===== IMPORT DE SWAGGER PARA DOCUMENTAR ENDPOINTS =====
+import io.swagger.v3.oas.annotations.Operation;           // Para resumir y describir cada endpoint
+import io.swagger.v3.oas.annotations.responses.ApiResponse; // Define respuesta HTTP individual
+import io.swagger.v3.oas.annotations.responses.ApiResponses; // Agrupa varias respuestas
+import io.swagger.v3.oas.annotations.security.SecurityRequirement; // Para indicar seguridad (JWT)
+import io.swagger.v3.oas.annotations.tags.Tag;            // Para agrupar endpoints en Swagger
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// ===== DOCUMENTACIÓN DEL CONTROLADOR =====
+// @Tag agrupa todos los endpoints bajo "Usuarios" en Swagger
 @Tag(
         name = "Usuarios",
-        description = "Operaciones relacionadas con la gestión de usuarios"
+        description = "Operaciones relacionadas con la gestión de usuarios del sistema"
 )
 @RestController
 @RequestMapping("/users")
+// Indica que este controlador requiere autenticación JWT
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
+
     @Qualifier("userFacadeImpl")
     private final UserFacade userFacade;
 
@@ -32,13 +39,14 @@ public class UserController {
         this.userFacade = userFacade;
     }
 
+    // ===== DOCUMENTACIÓN DEL ENDPOINT CREATE =====
     @Operation(
-            summary = "Crear un usuario",
-            description = "Ingresa un usuario"
+            summary = "Crear usuario",                 // Qué hace
+            description = "Crea un nuevo usuario en el sistema"
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente"),
-            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    @ApiResponses({                                   // Posibles respuestas
+            @ApiResponse(responseCode = "201", description = "Usuario creado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PostMapping
     public ResponseEntity<GenericOnlyTextResponse> create(@RequestBody CreateUserDTO userDTO) {
@@ -46,37 +54,65 @@ public class UserController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    // ===== DOCUMENTACIÓN DEL ENDPOINT FIND ALL =====
     @Operation(
             summary = "Listar usuarios",
-            description = "Obtiene un listado paginado de usuarios del sistema"
+            description = "Obtiene un listado paginado de usuarios"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Consulta exitosa"),
-            @ApiResponse(responseCode = "404", description = "No se proceso la consulta")
+            @ApiResponse(responseCode = "200", description = "Consulta exitosa")
     })
-    @SecurityRequirement(name = "")
     @GetMapping
     public ResponseEntity<GenericPaginationResponse<UserDTO>> findAll(Pageable pageable) {
         GenericPaginationResponse<UserDTO> response = userFacade.findAll(pageable);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    // ===== DOCUMENTACIÓN DEL ENDPOINT FIND BY ID =====
+    @Operation(
+            summary = "Buscar usuario por ID",
+            description = "Obtiene la información de un usuario específico"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<GenericResponse<UserDTO>> findOneById(@PathVariable Long id) {
-        GenericResponse<UserDTO> period = userFacade.findById(id);
-        return ResponseEntity.status(period.getStatus()).body(period);
+        GenericResponse<UserDTO> response = userFacade.findById(id);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    // ===== DOCUMENTACIÓN DEL ENDPOINT UPDATE =====
+    @Operation(
+            summary = "Actualizar usuario",
+            description = "Actualiza la información de un usuario existente"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<GenericOnlyTextResponse> update(@PathVariable Long id, @RequestBody UpdateUserDTO userDTO) {
+    public ResponseEntity<GenericOnlyTextResponse> update(
+            @PathVariable Long id,
+            @RequestBody UpdateUserDTO userDTO
+    ) {
         GenericOnlyTextResponse response = userFacade.update(id, userDTO);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    // ===== DOCUMENTACIÓN DEL ENDPOINT DELETE =====
+    @Operation(
+            summary = "Eliminar usuario",
+            description = "Elimina un usuario del sistema"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario eliminado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<GenericOnlyTextResponse> delete(@PathVariable Long id) {
         GenericOnlyTextResponse response = userFacade.delete(id);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-
 }

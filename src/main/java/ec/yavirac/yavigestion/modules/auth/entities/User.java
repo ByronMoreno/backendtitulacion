@@ -47,7 +47,7 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
-    private Person person;
+    Person person = new Person();
 
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)

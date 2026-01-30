@@ -1,4 +1,4 @@
-mpring.application.name=yavigestion
+spring.application.name=yavigestion
 server.port=8080
 
 # Base de Datos (Asegúrate de haber creado la BD 'titulacion' en pgAdmin)

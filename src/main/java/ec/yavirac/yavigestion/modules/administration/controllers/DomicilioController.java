@@ -1,10 +1,10 @@
 package ec.yavirac.yavigestion.modules.administration.controllers;
 
+// Imports de Spring y Java
 import ec.yavirac.yavigestion.modules.administration.dtos.request.domicilio.CreateDomicilioDto;
 import ec.yavirac.yavigestion.modules.administration.dtos.response.DomicilioResponseDto;
-import ec.yavirac.yavigestion.modules.administration.services.database.domicilio.DomicilioService;
+import ec.yavirac.yavigestion.modules.administration.services.facades.domicilio.DomicilioFacade;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,28 +15,25 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/domicilio")
-@Tag(name = "Domicilio", description = "Gestión de domicilios con DTOs y Paginación")
+@Tag(name = "Domicilio", description = "Gestión de domicilios con Capa Facade")
 public class DomicilioController {
 
     @Autowired
-    private DomicilioService domicilioService;
+    private DomicilioFacade domicilioFacade;
 
     @PostMapping("/insertar")
-    @Operation(summary = "Crear domicilio", description = "Usa CreateDomicilioDto para enviar los datos")
+    @Operation(summary = "Crear domicilio", description = "Pasa por el Facade para orquestar la creación")
     public ResponseEntity<DomicilioResponseDto> crear(@RequestBody CreateDomicilioDto d) {
-        // El servicio ahora se encarga de recibir el DTO y devolver el ResponseDTO
-        return ResponseEntity.ok(domicilioService.save(d));
+        return ResponseEntity.ok(domicilioFacade.guardar(d));
     }
 
-    @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     @GetMapping("/seleccionar")
-    @Operation(summary = "Listar con paginación manual")
+    @Operation(summary = "Listar con paginación vía Facade")
     public ResponseEntity<Page<DomicilioResponseDto>> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<DomicilioResponseDto> response = domicilioService.findAll(pageable);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(domicilioFacade.listar(pageable));
     }
 }
